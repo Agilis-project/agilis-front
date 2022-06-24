@@ -102,7 +102,17 @@ function Index(props){
   const [createTask, setCreateTask] = useState();
 
   let postRegister = async (taskNumber, taskName, description) => {
-    let response = await axios.post(`https://api-agilis.azurewebsites.net/api/Task`,{taskNumber:taskNumber, name:taskName, description:description});
+    let response = await axios.post(`https://api-agilis.azurewebsites.net/api/Task`,
+    {taskNumber:taskNumber, 
+    name:taskName, 
+    description:description, 
+    status: 1,
+    startDate: "2022-06-23T20:32:02.985Z",
+    endDate: "2022-06-28T20:32:02.985Z",
+    releaseDate: "2022-07-02T20:32:02.985Z",
+    idMember: 3,
+    idSprint: 1});
+
     setCreateTask(response.data);
     console.log(createTask);
   }
@@ -110,6 +120,7 @@ function Index(props){
   function handleSubmit(event){
     event.preventDefault();
     postRegister(taskNumber, taskName, description);
+    toggle();
   }
 
 
