@@ -35,12 +35,35 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.js";
+import { Fragment, useState, useEffect } from "react";
+import axios from "axios";
+import api from "api";
 
-const Backlog = () => {
+function Backlog() {
+  const [tasks, setTasks] = useState([]);
+  const [users, setUser] = useState([]);
+
+  useEffect(() => {
+    axios.get(`https://api-agilis.azurewebsites.net/api/Task`).then(({data}) => {
+      setTasks(data);
+    });
+    console.log(tasks);
+    // eslint-disable-next-line
+  }, []);
+
+ const deleteTask = (id) => {
+  axios.delete(`https://api-agilis.azurewebsites.net/api/Task/${id}`);
+  setTasks(
+    tasks.filter((task) => {
+      return task.id !== id;
+    })
+  );
+ };
+
+
   return (
     <>
       <Header />
-      {/* Page content */}
       <Container className="mt--7" fluid>
         {/* Table */}
         <Row>
@@ -59,29 +82,37 @@ const Backlog = () => {
                     <th scope="col" />
                   </tr>
                 </thead>
-                {/*Fazer map para popular tabela*/}
                 <tbody>
-                  <tr>
-                    <th scope="row">
+                {tasks?.map((task) => (
+                  <tr key={task.id}>
+                    
+                      <th scope="row"
+                      key={task.id}>
                       <Media className="align-items-center">
                         <a
+                          
                           className="mr-3"
                           href="/projeto/tarefaId"
                           onClick={(e) => e.preventDefault()}
                         >
-                          $idDaTarefa
+                          <div>
+                          {task.taskNumber}
+                          </div>
+                          
                         </a>
                         <Media>
                           <span className="mb-0 text-sm">
-                            $nomeDaTarefa
+                            {task.name}
                           </span>
                         </Media>
                       </Media>
                     </th>
-                    <td>$dataDeEntrega/</td>
-                    <td>$dataDeCriacao</td>
+                    
+                    <td>{task.endDate}</td>
+                    <td>{task.startDate}</td>
                     <td>
-                      <div className="avatar-group">
+                      
+                        <div className="avatar-group">
                         <a
                           className="avatar avatar-sm"
                           href="#pablo"
@@ -101,9 +132,12 @@ const Backlog = () => {
                           delay={0}
                           target="tooltip742438047"
                         >
+                        
                           $nomeDoResponsavel
                         </UncontrolledTooltip>
                       </div>
+                      
+                      
                     </td>
                     
                     <td className="text-right">
@@ -133,7 +167,7 @@ const Backlog = () => {
                           </DropdownItem>
                           <DropdownItem
                             href="#pablo"
-                            onClick={(e) => e.preventDefault()}
+                            onClick={() => deleteTask(task.id)}
                           >
                             Excluir tarefa
                           </DropdownItem>
@@ -141,59 +175,11 @@ const Backlog = () => {
                       </UncontrolledDropdown>
                     </td>
                   </tr>
+                  ))}
                 </tbody>
               </Table>
               <CardFooter className="py-4">
-                <nav aria-label="...">
-                  <Pagination
-                    className="pagination justify-content-end mb-0"
-                    listClassName="justify-content-end mb-0"
-                  >
-                    <PaginationItem className="disabled">
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                        tabIndex="-1"
-                      >
-                        <i className="fas fa-angle-left" />
-                        <span className="sr-only">Previous</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem className="active">
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        1
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        2 <span className="sr-only">(current)</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        3
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <i className="fas fa-angle-right" />
-                        <span className="sr-only">Next</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                  </Pagination>
-                </nav>
+                
               </CardFooter>
             </Card>
           </div>

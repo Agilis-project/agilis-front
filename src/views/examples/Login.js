@@ -18,9 +18,7 @@
 
 // reactstrap components
 import {
-  Button,
   Card,
-  CardHeader,
   CardBody,
   FormGroup,
   Form,
@@ -31,18 +29,39 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import React, { useState } from 'react';
+import axios from 'axios';
+import { Redirect, Route } from "react-router-dom";
 
-const Login = () => {
-  return (
-    <>
-      <Col lg="5" md="7">
+const urlApi = "https://api-agilis.azurewebsites.net/"
+
+function Login() {
+  const [login, setLogin] = useState();
+  const [senha, setSenha] = useState();
+  const [autenticado, setAutenticado] = useState();
+
+  let postLogin = async (login, senha) => {
+    let response = await axios.post(urlApi+`LoginUser`,{email:login,password:senha});
+    setAutenticado(response.data);
+    localStorage.setItem('login',login);
+    
+  }
+  function handleSubmit(event){
+      event.preventDefault();
+      postLogin(login,senha);
+      console.log(autenticado);
+  }
+
+    if (autenticado == undefined) {
+      return(
+        <Col lg="5" md="7">
         <Card className="bg-secondary shadow border-0">
        
           <CardBody className="px-lg-5 py-lg-5">
             <div className="text-center text-muted mb-4">
               <small>Faça seu login</small>
             </div>
-            <Form role="form">
+            <Form onSubmit={handleSubmit} role="form">
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
@@ -51,6 +70,8 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
+                    value={login}
+                    onChange={(e) => setLogin(e.target.value)}
                     placeholder="Email"
                     type="email"
                     autoComplete="new-email"
@@ -65,6 +86,8 @@ const Login = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
                     placeholder="Senha"
                     type="password"
                     autoComplete="new-password"
@@ -85,9 +108,8 @@ const Login = () => {
                 </label>
               </div>
               <div className="text-center">
-                <Button className="my-4" color="primary" type="button">
-                  Acessar
-                </Button>
+                <Input className="my-4" color="primary" type="submit" value="Acessar"/>
+                  
               </div>
             </Form>
           </CardBody>
@@ -113,8 +135,23 @@ const Login = () => {
           </Col>
         </Row>
       </Col>
-    </>
-  );
-};
+      )
+    }
+    else if(autenticado){
+      return(
+        <Route exact path="/">
+          {console.log(autenticado)}
+        </Route>
+      )
+    }
+    else{
+      return(
+        <h1>
+          Login inválido
+        </h1>
+      )
+    }
+}
+
 
 export default Login;

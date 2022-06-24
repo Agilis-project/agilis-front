@@ -38,8 +38,31 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.js";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const ActiveSprint = () => {
+function ActiveSprint(){
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    axios.get(`https://api-agilis.azurewebsites.net/api/Task/Sprint/1`).then(({data}) => {
+      setTasks(data);
+    });
+    console.log(tasks);
+    // eslint-disable-next-line
+  }, []);
+
+
+  const deleteTask = (id) => {
+    axios.delete(`https://api-agilis.azurewebsites.net/api/Task/${id}`);
+    setTasks(
+      tasks.filter((task) => {
+        return task.id !== id;
+      })
+    );
+  };
+
+
   return (
     <>
       <Header />
@@ -84,28 +107,30 @@ const ActiveSprint = () => {
                 </thead>
                 {/*Fazer map para popular tabela*/}
                 <tbody>
-                  <tr>
-                    <th scope="row">
+                  {tasks?.map((task) => (
+                  <tr key={task.id}>
+                    <th scope="row"
+                    key={task.id}>
                       <Media className="align-items-center">
                         <a
                           className="mr-3"
                           href="#pablo"
                           onClick={(e) => e.preventDefault()}
                         >
-                          $idDaTarefa
+                          {task.taskNumber}
                         </a>
                         <Media>
                           <span className="mb-0 text-sm">
-                            $nomeDaTarefa
+                            {task.name}
                           </span>
                         </Media>
                       </Media>
                     </th>
-                    <td>$dataDeEntrega/</td>
+                    <td>{task.endDate}</td>
                     <td>
                       <Badge color="" className="badge-dot mr-4">
                         <i className="bg-warning" />
-                        $statusDaTarefa
+                        {task.status}
                       </Badge>
                     </td>
                     <td>
@@ -161,7 +186,7 @@ const ActiveSprint = () => {
                           </DropdownItem>
                           <DropdownItem
                             href="#pablo"
-                            onClick={(e) => e.preventDefault()}
+                            onClick={() => deleteTask(task.id)}
                           >
                             Excluir tarefa
                           </DropdownItem>
@@ -169,6 +194,8 @@ const ActiveSprint = () => {
                       </UncontrolledDropdown>
                     </td>
                   </tr>
+                  ))}
+                  
                 </tbody>
               </Table>
               <CardFooter className="py-4">

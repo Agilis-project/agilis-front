@@ -30,17 +30,35 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import axios from "axios";
+import { useState } from "react";
 
-const Register = () => {
-  return (
-    <>
+function Register() {
+  const [name, setName] = useState();
+  const [email, setEmail] = useState();
+  const [password, setPassword] = useState();
+  const [register, setRegister] = useState();
+
+  let postRegister = async (name, email, password) => {
+    let response = await axios.post(`https://api-agilis.azurewebsites.net/api/User`,{name:name, email:email, password:password, role:1});
+    setRegister(response.data);
+    console.log(register);
+  }
+
+  function handleSubmit(event){
+    event.preventDefault();
+    postRegister(name,email,password);
+  }
+
+  if (register == undefined) {
+    return(
       <Col lg="6" md="8">
         <Card className="bg-secondary shadow border-0">
           <CardBody className="px-lg-5 py-lg-5">
             <div className="text-center text-muted mb-4">
               <small>Crie sua conta</small>
             </div>
-            <Form role="form">
+            <Form onSubmit={handleSubmit} role="form">
               <FormGroup>
                 <InputGroup className="input-group-alternative mb-3">
                   <InputGroupAddon addonType="prepend">
@@ -48,7 +66,12 @@ const Register = () => {
                       <i className="ni ni-hat-3" />
                     </InputGroupText>
                   </InputGroupAddon>
-                  <Input placeholder="Nome" type="text" />
+                  <Input
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)} 
+                    placeholder="Nome" 
+                    type="text" />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -59,6 +82,9 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
                     type="email"
                     autoComplete="new-email"
@@ -73,6 +99,9 @@ const Register = () => {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Senha"
                     type="password"
                     autoComplete="new-password"
@@ -102,16 +131,16 @@ const Register = () => {
                 </Col>
               </Row>
               <div className="text-center">
-                <Button className="mt-4" color="primary" type="button">
-                  Criar conta
-                </Button>
+                <Input className="mt-4" color="primary" type="submit" value="Criar conta"/>
+                 
               </div>
             </Form>
           </CardBody>
         </Card>
       </Col>
-    </>
-  );
-};
+    )
+  }
+
+}
 
 export default Register;

@@ -15,7 +15,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import { useState } from "react";
+import { useEffect, useState, React } from "react";
 // node.js library that concatenates classes (strings)
 import classnames from "classnames";
 // javascipt plugin for creating charts
@@ -29,6 +29,9 @@ import {
   Card,
   CardHeader,
   CardBody,
+  Form,
+  FormGroup,
+  Label,
   Media,
   NavItem,
   NavLink,
@@ -41,6 +44,11 @@ import {
   DropdownItem,
   UncontrolledDropdown,
   DropdownToggle,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Input
 } from "reactstrap";
 
 // core components
@@ -51,8 +59,24 @@ import {
 } from "variables/charts.js";
 
 import Header from "components/Headers/Header.js";
+import axios from "axios";
 
-const Index = (props) => {
+function Index(props){
+  const [tasks, setTasks] = useState([]);
+  const [sprints, setSprints] = useState([]);
+
+  useEffect(() => {
+    axios.get(`https://api-agilis.azurewebsites.net/api/Task/Sprint/1`).then(({data}) => {
+      setTasks(data);
+    });
+  }, []);
+
+  useEffect(() => {
+    axios.get(`https://api-agilis.azurewebsites.net/api/Task/Sprint/1`).then(({data}) => {
+      setSprints(data);
+    });
+  }, []);
+
   const [activeNav, setActiveNav] = useState(1);
   const [chartExample1Data, setChartExample1Data] = useState("data1");
 
@@ -64,7 +88,31 @@ const Index = (props) => {
     e.preventDefault();
     setActiveNav(index);
     setChartExample1Data("data" + index);
-  };
+  }
+
+      // Modal open state
+      const [modal, setModal] = useState(false);
+  
+      // Toggle for Modal
+      const toggle = () => setModal(!modal);
+
+  const [taskNumber, setTaskNumber] = useState();
+  const [taskName, setTaskName] = useState();
+  const [description, setDescription] = useState();
+  const [createTask, setCreateTask] = useState();
+
+  let postRegister = async (taskNumber, taskName, description) => {
+    let response = await axios.post(`https://api-agilis.azurewebsites.net/api/Task`,{taskNumber:taskNumber, name:taskName, description:description});
+    setCreateTask(response.data);
+    console.log(createTask);
+  }
+
+  function handleSubmit(event){
+    event.preventDefault();
+    postRegister(taskNumber, taskName, description);
+  }
+
+
   return (
     <>
       <Header />
@@ -133,12 +181,50 @@ const Index = (props) => {
                   <div className="col text-right">
                     <Button
                       color="primary"
-                      href="#pablo"
-                      onClick={(e) => e.preventDefault()}
+                      onClick={toggle}
                       size="sm"
                     >
                       Criar task
                     </Button>
+                    <Modal isOpen={modal} toggle={toggle}>
+                      <ModalHeader toggle={toggle}>
+                        <h3>Criar task</h3>
+                      </ModalHeader>
+                      <ModalBody>
+                        <Form onSubmit={handleSubmit} role="form">
+                          <FormGroup className="mb-3">
+                          <Label>Número da task</Label>
+                            <Input
+                              type="text"
+                              autoFocus
+                              value={taskNumber}
+                              onChange={(e) => setTaskNumber(e.target.value)}
+                            />
+                            <Label>Nome da task</Label>
+                            <Input
+                              type="text"
+                              autoFocus
+                              value={taskName}
+                              onChange={(e) => setTaskName(e.target.value)}
+                            />
+                          </FormGroup>
+                          <FormGroup className="mb-3">
+                            <Label>Descrição</Label>
+                            <Input 
+                              value={description} 
+                              as="textarea" 
+                              rows={3}
+                              onChange={(e) => setDescription(e.target.value)} />
+                          </FormGroup>
+                          <Input type="submit" value="Criar task"/>
+                        </Form>
+                      </ModalBody>
+                      <ModalFooter>
+                        <Button onClick={toggle}>
+                          Cancelar
+                        </Button>
+                      </ModalFooter>
+                    </Modal>
                   </div>
                 </Row>
               </CardHeader>
@@ -150,25 +236,27 @@ const Index = (props) => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                  <th scope="row">
-                      <Media className="align-items-center">
-                        <a
-                          className="mr-3"
-                          href="/projeto/tarefaId"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          $idDaTarefa
-                        </a>
-                        <Media>
-                          <span className="mb-0 text-sm">
-                            $nomeDaTarefa
-                          </span>
+                  {tasks?.map((task) => (
+                    <tr key={task.id}>
+                    <th scope="row">
+                        <Media className="align-items-center">
+                          <a
+                            className="mr-3"
+                            href="/projeto/tarefaId"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            {task.taskNumber}
+                          </a>
+                          <Media>
+                            <span className="mb-0 text-sm">
+                              {task.name}
+                            </span>
+                          </Media>
                         </Media>
-                      </Media>
-                    </th>
-                    <td>$dataDeCriacao</td>
-                  </tr>
+                      </th>
+                      <td>{task.startDate}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </Table>
             </Card>
@@ -201,36 +289,39 @@ const Index = (props) => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                  <th scope="row">
-                      <Media className="align-items-center">
-                        <a
-                          className="mr-3"
-                          href="/projeto/tarefaId"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          $idDaTarefa
-                        </a>
-                        <Media>
-                          <span className="mb-0 text-sm">
-                            $nomeDaTarefa
-                          </span>
+                  {sprints?.map((sprint) => (
+                    <tr key={sprint.id}>
+                    <th scope="row">
+                        <Media className="align-items-center">
+                          <a
+                            className="mr-3"
+                            href="/projeto/tarefaId"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            {sprint.taskNumber}
+                          </a>
+                          <Media>
+                            <span className="mb-0 text-sm">
+                              {sprint.name}
+                            </span>
+                          </Media>
                         </Media>
-                      </Media>
-                    </th>
-                    <td>
-                      <Badge color="" className="badge-dot mr-4">
-                        <i className="bg-warning" />
-                        $statusDaTarefa
-                      </Badge>
-                    </td>
-                    <td>$dataDeEntrega</td>
-                  </tr>
+                      </th>
+                      <td>
+                        <Badge color="" className="badge-dot mr-4">
+                          <i className="bg-warning" />
+                          {sprint.status}
+                        </Badge>
+                      </td>
+                      <td>{sprint.endDate}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </Table>
             </Card>
           </Col>
         </Row>
+        <br/>
         <Row>
           <Col className="mb-5 mb-xl-0" xl="12">
             <Card className="shadow">
